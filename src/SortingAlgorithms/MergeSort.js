@@ -1,36 +1,64 @@
-// Function to sort 2 sorted arrays
-const merge = (setArray, arr1, arr2) => {
-  let sortedArr = [];
+let auxiliaryArray;
+let moments = [];
 
-  while (arr1.length && arr2.length) {
-    if (arr1[0] <= arr2[0]) {
-      sortedArr.push(arr1.shift());
-    } else {
-      sortedArr.push(arr2.shift());
-    }
+// Function to sort and merge left and right halves
+const merge = (array, start, mid, end) => {
+  let [i, j] = [start, mid + 1];
+
+  for (let k = start; k <= end; k++) {
+    auxiliaryArray[k] = array[k];
   }
-  setArray([...sortedArr, ...arr1, ...arr2]);
 
-  return [...sortedArr, ...arr1, ...arr2];
+  console.log("auxiliary:" + auxiliaryArray ,"i, j:", [i, j]);
+
+  for (let k = start; k <= end; k++) {
+    moments.push({ wholeArray: [...array], highlighted: [k, i, j] });
+
+
+    // NOTE: If i > mid OR j > end, that means in the previous loop last element of j was added OR last element of i was added and remaining index on the other side needs to be added.
+    if (i > mid) {
+      console.log("i > mid: " , i , mid, "auxiliaryArray[j]:",  auxiliaryArray[j]);
+      array[k] = auxiliaryArray[j++];
+    } else if (j > end) {
+      console.log("j > end: " , j , end, "auxiliaryArray[i]:" , auxiliaryArray[i]);
+      array[k] = auxiliaryArray[i++];
+    } else if (auxiliaryArray[j] < auxiliaryArray[i]) {
+      console.log("auxiliaryArray[j] < auxiliaryArray[i]: " , auxiliaryArray[j] , auxiliaryArray[i]);
+      array[k] = auxiliaryArray[j++];
+    } else {
+      console.log("auxiliaryArray[i] < auxiliaryArray[j]:  " , auxiliaryArray[i] , auxiliaryArray[j]);
+      array[k] = auxiliaryArray[i++];
+    }
+
+    console.log("array:", array ,"k, i, j:", [k, i, j]);
+  }
 };
 
+// Function to "sort" array. This method stores the indices of the elements that need to be sorted, as opposed to the legacy way of recursively splitting array into 2 smaller arrays. This way has better space complexity and alstartws for the original indices to be tracked for the animation.
+// i.e. start = starting index of array, end = ending index of array
+const sort = (array, start, end) => {
+  if (start >= end) return;
+
+  let mid = Math.floor(start + (end - start) / 2);
+
+  sort(array, start, mid); // sort the left half
+  sort(array, mid + 1, end); // sort the right half
+
+  console.log(array, start, mid, end);
+
+  merge(array, start, mid, end); // merge results
+};
 
 // Function to split arrays into smaller arrays
-export const mergeSort = (arr, setArray) => {
-  const aLen = arr.length;
+export const mergeSort = (array) => {
+  moments.push({ wholeArray: [...array], highlighted: [] });
 
-  if (aLen === 1) {
-    return arr;
-  }
+  // Fill dummy values into auxiliary array such that auxiliary array is of the same length as input array
+  auxiliaryArray = new Array(array.length).fill(0);
 
-  let arr1 = arr.slice(0, aLen / 2);
-  let arr2 = arr.slice(aLen / 2);
+  sort(array, 0, array.length - 1);
 
-  arr1 = mergeSort(arr1);
-  arr2 = mergeSort(arr2);
+  moments.push({ wholeArray: [...array], highlighted: [] });
 
-  
-
-  return merge(setArray, arr1, arr2);
+  return moments;
 };
-
